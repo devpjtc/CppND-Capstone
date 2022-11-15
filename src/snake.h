@@ -2,7 +2,9 @@
 #define SNAKE_H
 
 #include <vector>
-#include "SDL.h"
+#include <memory>
+#include "SDL.h" 
+#include "map.h"
 
 class Snake {
  public:
@@ -14,14 +16,14 @@ class Snake {
         head_x(grid_width / 2),
         head_y(grid_height / 2) {}
 
-  void Update();
+  std::unique_ptr<Map> Update(std::unique_ptr<Map> map);
 
   void GrowBody();
   bool SnakeCell(int x, int y);
 
   Direction direction = Direction::kUp;
 
-  float speed{0.1f};
+  float speed{0.05f};
   int size{1};
   bool alive{true};
   float head_x;

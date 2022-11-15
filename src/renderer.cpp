@@ -38,7 +38,7 @@ Renderer::~Renderer() {
   SDL_Quit();
 }
 
-void Renderer::Render(Snake const snake, SDL_Point const &food) {
+void Renderer::Render(Snake const snake, SDL_Point const &food, Map* map) {
   SDL_Rect block;
   block.w = screen_width / grid_width;
   block.h = screen_height / grid_height;
@@ -46,6 +46,18 @@ void Renderer::Render(Snake const snake, SDL_Point const &food) {
   // Clear screen
   SDL_SetRenderDrawColor(sdl_renderer, 0x1E, 0x1E, 0x1E, 0xFF);
   SDL_RenderClear(sdl_renderer);
+
+  // Render map
+  SDL_SetRenderDrawColor(sdl_renderer, 0xDB, 0x80, 0xBE, 0xFF);
+  for (int i=0; i<grid_width; i++) {
+    for (int j=0; j<grid_height; j++) {
+      if ((*map).getCellValue(i,j) == 1) {
+        block.x = i * block.w;
+        block.y = j * block.h;
+        SDL_RenderFillRect(sdl_renderer, &block);
+      }
+    }
+  }
 
   // Render food
   SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xCC, 0x00, 0xFF);

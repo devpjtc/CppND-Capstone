@@ -1,12 +1,14 @@
 #include "game.h"
 #include <iostream>
 #include "SDL.h"
+#include <memory>
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake(grid_width, grid_height),
       engine(dev()),
       random_w(0, static_cast<int>(grid_width - 1)),
       random_h(0, static_cast<int>(grid_height - 1)) {
+  map = std::unique_ptr<Map>(new Map(grid_width, grid_height));
   PlaceFood();
 }
 
@@ -25,7 +27,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, snake);
     Update();
-    renderer.Render(snake, food);
+    renderer.Render(snake, food, map.get());
 
     frame_end = SDL_GetTicks();
 
@@ -57,7 +59,7 @@ void Game::PlaceFood() {
     y = random_h(engine);
     // Check that the location is not occupied by a snake item before placing
     // food.
-    if (!snake.SnakeCell(x, y)) {
+    if (!snake.SnakeCell(x, y) && ((*map.get()).getCellValue(x,y) == 0)) {
       food.x = x;
       food.y = y;
       return;
@@ -68,7 +70,7 @@ void Game::PlaceFood() {
 void Game::Update() {
   if (!snake.alive) return;
 
-  snake.Update();
+  map = snake.Update(std::move(map));
 
   int new_x = static_cast<int>(snake.head_x);
   int new_y = static_cast<int>(snake.head_y);
@@ -79,7 +81,7 @@ void Game::Update() {
     PlaceFood();
     // Grow snake and increase speed.
     snake.GrowBody();
-    snake.speed += 0.02;
+    snake.speed += 0.01;
   }
 }
 
